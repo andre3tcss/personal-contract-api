@@ -1,6 +1,5 @@
 package br.com.andre.personalcontractapi.controller;
 
-// IMPORTS QUE ESTAVAM FALTANDO:
 import br.com.andre.personalcontractapi.domain.Contract;
 import br.com.andre.personalcontractapi.dto.ContractRequestDto;
 import br.com.andre.personalcontractapi.repository.ContractRepository;
@@ -27,9 +26,7 @@ public class ContractController {
         newContract.setClientName(contractDto.clientName());
         newContract.setDescription(contractDto.description());
         newContract.setValue(contractDto.value());
-
         Contract savedContract = contractRepository.save(newContract);
-
         URI location = URI.create("/api/contracts/" + savedContract.getId());
         return ResponseEntity.created(location).body(savedContract);
     }
@@ -37,9 +34,31 @@ public class ContractController {
     @GetMapping("/{id}")
     public ResponseEntity<Contract> getContractById(@PathVariable Long id) {
         Optional<Contract> contractOptional = contractRepository.findById(id);
-
         return contractOptional
                 .map(contract -> ResponseEntity.ok(contract))
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Contract> updateContract(@PathVariable Long id, @RequestBody ContractRequestDto contractDto) {
+        return contractRepository.findById(id)
+                .map(existingContract -> {
+                    existingContract.setClientName(contractDto.clientName());
+                    existingContract.setDescription(contractDto.description());
+                    existingContract.setValue(contractDto.value());
+                    Contract updatedContract = contractRepository.save(existingContract);
+                    return ResponseEntity.ok(updatedContract);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteContract(@PathVariable Long id) {
+        if (contractRepository.existsById(id)) {
+            contractRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
