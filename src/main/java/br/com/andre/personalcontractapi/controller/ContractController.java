@@ -1,5 +1,6 @@
 package br.com.andre.personalcontractapi.controller;
 
+import jakarta.validation.Valid;
 import br.com.andre.personalcontractapi.domain.Contract;
 import br.com.andre.personalcontractapi.dto.ContractRequestDto;
 import br.com.andre.personalcontractapi.repository.ContractRepository;
@@ -21,7 +22,7 @@ public class ContractController {
     }
 
     @PostMapping
-    public ResponseEntity<Contract> createContract(@RequestBody ContractRequestDto contractDto) {
+    public ResponseEntity<Contract> createContract(@Valid @RequestBody ContractRequestDto contractDto) {
         Contract newContract = new Contract();
         newContract.setClientName(contractDto.clientName());
         newContract.setDescription(contractDto.description());
@@ -40,7 +41,7 @@ public class ContractController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Contract> updateContract(@PathVariable Long id, @RequestBody ContractRequestDto contractDto) {
+    public ResponseEntity<Contract> updateContract(@PathVariable Long id, @Valid @RequestBody ContractRequestDto contractDto) {
         return contractRepository.findById(id)
                 .map(existingContract -> {
                     existingContract.setClientName(contractDto.clientName());
