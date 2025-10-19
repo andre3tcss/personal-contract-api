@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.util.Optional;
+import br.com.andre.personalcontractapi.dto.ContractResponseDto;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/contracts")
@@ -61,5 +63,21 @@ public class ContractController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ContractResponseDto>> getAllContracts() {
+        List<Contract> contracts = contractRepository.findAll();
+
+        List<ContractResponseDto> contractDtos = contracts.stream()
+                .map(contract -> new ContractResponseDto(
+                        contract.getId(),
+                        contract.getClientName(),
+                        contract.getDescription(),
+                        contract.getValue()
+                ))
+                .toList();
+
+        return ResponseEntity.ok(contractDtos);
     }
 }
