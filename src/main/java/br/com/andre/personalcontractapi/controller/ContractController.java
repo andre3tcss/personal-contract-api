@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import br.com.andre.personalcontractapi.domain.Contract;
 import br.com.andre.personalcontractapi.dto.ContractRequestDto;
 import br.com.andre.personalcontractapi.repository.ContractRepository;
+import br.com.andre.personalcontractapi.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,22 +38,23 @@ public class ContractController {
     @GetMapping("/{id}")
     public ResponseEntity<Contract> getContractById(@PathVariable Long id) {
         Optional<Contract> contractOptional = contractRepository.findById(id);
-        return contractOptional
-                .map(contract -> ResponseEntity.ok(contract))
-                .orElse(ResponseEntity.notFound().build());
+        Contract contract = contractRepository.findById(id) .orElseThrow(() ->
+                new ResourceNotFoundException("Contract not found with id: " + id));
+
+        return ResponseEntity.ok(contract);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Contract> updateContract(@PathVariable Long id, @Valid @RequestBody ContractRequestDto contractDto) {
-        return contractRepository.findById(id)
-                .map(existingContract -> {
-                    existingContract.setClientName(contractDto.clientName());
-                    existingContract.setDescription(contractDto.description());
-                    existingContract.setValue(contractDto.value());
-                    Contract updatedContract = contractRepository.save(existingContract);
-                    return ResponseEntity.ok(updatedContract);
-                })
-                .orElse(ResponseEntity.notFound().build());
+        Contract existingContract = contractRepository.findById(id) .orElseThrow(() ->
+                new ResourceNotFoundException("Contract not found with id: " + id));
+        existingContract.setClientName(contractDto.clientName());
+        existingContract.setDescription(contractDto.description());
+        existingContract.setValue(contractDto.value());
+
+        Contract updatedContract = contractRepository.save(existingContract);
+
+        return ResponseEntity.ok(updatedContract);
     }
 
     @DeleteMapping("/{id}")
